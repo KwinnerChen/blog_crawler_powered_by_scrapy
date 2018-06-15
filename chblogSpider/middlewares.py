@@ -6,6 +6,7 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import random
 
 
 class ChblogspiderSpiderMiddleware(object):
@@ -54,3 +55,29 @@ class ChblogspiderSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class AgentMiddleware(object):
+
+    def __init__(self, agent):
+        self.agent = agent
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.settings.getlist('USER_AGENT'))
+    
+    def process_request(self, request, spider):
+        request.headers.setdefault('User-Agent', random.choice(self.agent))
+
+
+class ProxyMiddleware(object):
+
+    def __init__(self, proxy):
+        self.proxy = proxy
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.settings.getlist('IPPOOL'))
+
+    def process_request(self, request, spider):
+        request.meta['proxy'] = random.choice(self.proxy)
